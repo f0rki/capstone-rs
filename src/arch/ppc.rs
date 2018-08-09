@@ -8,12 +8,12 @@ use std::convert::From;
 use std::{cmp, fmt, slice};
 
 // XXX todo(tmfink): create rusty versions
-pub use capstone_sys::ppc_insn_group as PpcInsnGroup;
-pub use capstone_sys::ppc_insn as PpcInsn;
-pub use capstone_sys::ppc_reg as PpcReg;
 pub use capstone_sys::ppc_bc as PpcBc;
 pub use capstone_sys::ppc_bh as PpcBh;
+pub use capstone_sys::ppc_insn as PpcInsn;
+pub use capstone_sys::ppc_insn_group as PpcInsnGroup;
 use capstone_sys::ppc_op_crx;
+pub use capstone_sys::ppc_reg as PpcReg;
 
 /// Contains PPC-specific details for an instruction
 pub struct PpcInsnDetail<'a>(pub(crate) &'a cs_ppc);
@@ -46,7 +46,7 @@ pub enum PpcOperand {
     Reg(RegId),
 
     /// Immediate
-    Imm(i32),
+    Imm(i64),
 
     /// Memory
     Mem(PpcOpMem),
@@ -149,19 +149,16 @@ mod test {
 
     #[test]
     fn test_ppc_op_type() {
-        use capstone_sys::*;
+        use self::PpcOperand::*;
         use super::ppc_op_type::*;
         use super::PpcBc::*;
         use super::PpcReg::*;
-        use self::PpcOperand::*;
+        use capstone_sys::*;
 
-        fn t(
-            op: (ppc_op_type, cs_ppc_op__bindgen_ty_1),
-            expected_op: PpcOperand,
-        ) {
+        fn t(op: (ppc_op_type, cs_ppc_op__bindgen_ty_1), expected_op: PpcOperand) {
             let op = PpcOperand::from(&cs_ppc_op {
                 type_: op.0,
-                __bindgen_anon_1: op.1
+                __bindgen_anon_1: op.1,
             });
             assert_eq!(expected_op, op);
         }
@@ -174,12 +171,13 @@ mod test {
             (PPC_OP_REG, cs_ppc_op__bindgen_ty_1 { reg: 0 }),
             Reg(RegId(0)),
         );
-        t(
-            (PPC_OP_IMM, cs_ppc_op__bindgen_ty_1 { imm: 42 }),
-            Imm(42),
-        );
+        t((PPC_OP_IMM, cs_ppc_op__bindgen_ty_1 { imm: 42 }), Imm(42));
 
-        let crx = ppc_op_crx { scale: 0, reg: PPC_REG_R0, cond: PPC_BC_LT };
+        let crx = ppc_op_crx {
+            scale: 0,
+            reg: PPC_REG_R0,
+            cond: PPC_BC_LT,
+        };
         t(
             (PPC_OP_CRX, cs_ppc_op__bindgen_ty_1 { crx }),
             Crx(PpcOpCrx(crx)),
@@ -187,9 +185,12 @@ mod test {
 
         let op_mem = PpcOperand::from(&cs_ppc_op {
             type_: PPC_OP_MEM,
-            __bindgen_anon_1: cs_ppc_op__bindgen_ty_1 { mem: ppc_op_mem {
-                base: PPC_REG_VS38,
-                disp: -10 }}
+            __bindgen_anon_1: cs_ppc_op__bindgen_ty_1 {
+                mem: ppc_op_mem {
+                    base: PPC_REG_VS38,
+                    disp: -10,
+                },
+            },
         });
         if let Mem(op_mem) = op_mem {
             assert_eq!(

@@ -8,11 +8,11 @@ use std::convert::From;
 use std::{cmp, fmt, slice};
 
 // XXX todo(tmfink): create rusty versions
-pub use capstone_sys::sparc_insn_group as SparcInsnGroup;
-pub use capstone_sys::sparc_insn as SparcInsn;
-pub use capstone_sys::sparc_reg as SparcReg;
 pub use capstone_sys::sparc_cc as SparcCC;
 pub use capstone_sys::sparc_hint as SparcHint;
+pub use capstone_sys::sparc_insn as SparcInsn;
+pub use capstone_sys::sparc_insn_group as SparcInsnGroup;
+pub use capstone_sys::sparc_reg as SparcReg;
 
 /// Contains SPARC-specific details for an instruction
 pub struct SparcInsnDetail<'a>(pub(crate) &'a cs_sparc);
@@ -24,7 +24,7 @@ pub enum SparcOperand {
     Reg(RegId),
 
     /// Immediate
-    Imm(i32),
+    Imm(i64),
 
     /// Memory
     Mem(SparcOpMem),

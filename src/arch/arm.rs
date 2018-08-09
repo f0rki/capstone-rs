@@ -8,16 +8,16 @@ use std::convert::From;
 use std::os::raw::c_uint;
 use std::{cmp, fmt, slice};
 
-pub use capstone_sys::arm_insn_group as ArmInsnGroup;
 pub use capstone_sys::arm_insn as ArmInsn;
+pub use capstone_sys::arm_insn_group as ArmInsnGroup;
 pub use capstone_sys::arm_reg as ArmReg;
 
-pub use capstone_sys::arm_vectordata_type as ArmVectorData;
-pub use capstone_sys::arm_cpsmode_type as ArmCPSMode;
-pub use capstone_sys::arm_cpsflag_type as ArmCPSFlag;
 pub use capstone_sys::arm_cc as ArmCC;
+pub use capstone_sys::arm_cpsflag_type as ArmCPSFlag;
+pub use capstone_sys::arm_cpsmode_type as ArmCPSMode;
 pub use capstone_sys::arm_mem_barrier as ArmMemBarrier;
 pub use capstone_sys::arm_setend_type as ArmSetendType;
+pub use capstone_sys::arm_vectordata_type as ArmVectorData;
 use capstone_sys::{arm_shifter, cs_arm_op__bindgen_ty_2};
 
 /// Contains ARM-specific details for an instruction
@@ -250,7 +250,7 @@ impl Default for ArmOperand {
             vector_index: None,
             subtracted: false,
             shift: ArmShift::Invalid,
-            op_type: ArmOperandType::Invalid
+            op_type: ArmOperandType::Invalid,
         }
     }
 }
@@ -342,31 +342,25 @@ mod test {
             writeback: false,
             mem_barrier: arm_mem_barrier::ARM_MB_INVALID,
             op_count: 0,
-            operands: [
-                cs_arm_op {
-                    vector_index: 0,
-                    shift: cs_arm_op__bindgen_ty_1 {
-                        type_: arm_shifter::ARM_SFT_INVALID,
-                        value: 0
-                    },
-                    type_: arm_op_type::ARM_OP_INVALID,
-                    __bindgen_anon_1: cs_arm_op__bindgen_ty_2 { imm: 0 },
-                    subtracted: false,
-                }
-            ; 36]
+            operands: [cs_arm_op {
+                vector_index: 0,
+                shift: cs_arm_op__bindgen_ty_1 {
+                    type_: arm_shifter::ARM_SFT_INVALID,
+                    value: 0,
+                },
+                type_: arm_op_type::ARM_OP_INVALID,
+                __bindgen_anon_1: cs_arm_op__bindgen_ty_2 { imm: 0 },
+                subtracted: false,
+                neon_lane: 0,
+                access: 0,
+            }; 36],
         };
         let a2 = cs_arm {
             usermode: true,
             ..a1
         };
-        let a3 = cs_arm {
-            op_count: 20,
-            ..a1
-        };
-        let a4 = cs_arm {
-            op_count: 19,
-            ..a1
-        };
+        let a3 = cs_arm { op_count: 20, ..a1 };
+        let a4 = cs_arm { op_count: 19, ..a1 };
         let a4_clone = a4.clone();
         assert_eq!(ArmInsnDetail(&a1), ArmInsnDetail(&a1));
         assert_ne!(ArmInsnDetail(&a1), ArmInsnDetail(&a2));

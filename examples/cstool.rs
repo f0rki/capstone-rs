@@ -81,6 +81,7 @@ arch_conversions!(
         SPARC,
         SYSZ,
         XCORE,
+        EVM,
     ]
 );
 
@@ -94,7 +95,7 @@ arch_conversions!(
         Thumb,
         Mips3,
         Mips32R6,
-        MipsGP64,
+        Mips64,
         V9,
         Default,
     ]
@@ -229,49 +230,42 @@ fn main() {
                 .long("file")
                 .help("input file with binary instructions")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("stdin")
                 .short("s")
                 .long("stdin")
                 .help("read binary instructions from stdin")
                 .takes_value(false),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("code")
                 .short("c")
                 .long("code")
                 .help("instruction bytes (implies --hex)")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("address")
                 .short("r")
                 .long("addr")
                 .help("address of code")
                 .takes_value(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("v")
                 .short("v")
                 .multiple(true)
                 .help("Sets the level of verbosity"),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("hex")
                 .short("x")
                 .long("hex")
                 .help("Treat input has hex; only select characters that are [a-fA-F0-9]")
                 .takes_value(false),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("DETAIL")
                 .short("d")
                 .long("detail")
                 .help("Print details about instructions")
                 .takes_value(false),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("ARCH")
                 .short("a")
                 .long("arch")
@@ -280,8 +274,7 @@ fn main() {
                 .required(true)
                 .possible_values(arches.as_slice())
                 .case_insensitive(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("MODE")
                 .short("m")
                 .long("mode")
@@ -290,8 +283,7 @@ fn main() {
                 .required(true)
                 .possible_values(modes.as_slice())
                 .case_insensitive(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("EXTRA_MODE")
                 .short("e")
                 .long("extra")
@@ -301,8 +293,7 @@ fn main() {
                 .possible_values(extra_modes.as_slice())
                 .case_insensitive(true)
                 .multiple(true),
-        )
-        .arg(
+        ).arg(
             Arg::with_name("ENDIAN")
                 .short("n")
                 .long("endian")
@@ -311,15 +302,13 @@ fn main() {
                 .required(false)
                 .possible_values(&["little", "big"])
                 .case_insensitive(true),
-        )
-        .group(
+        ).group(
             ArgGroup::with_name("INPUT")
                 .arg("file")
                 .arg("stdin")
                 .arg("code")
                 .required(true),
-        )
-        .get_matches();
+        ).get_matches();
 
     let direct_input_bytes: Vec<u8> = if let Some(file_path) = matches.value_of("file") {
         let mut file = File::open(file_path).expect_exit();

@@ -386,9 +386,13 @@ mod test {
             .map(|expected_op| {
                 let expected_op: ArchOperand = (*expected_op).clone().into();
                 expected_op
-            })
-            .collect();
-        assert_eq!(expected_ops, arch_ops, "operands do not match");
+            }).collect();
+        assert_eq!(
+            expected_ops,
+            arch_ops,
+            "operands do not match {:?}",
+            insn.mnemonic()
+        );
     }
 
     /// Assert instruction belongs or does not belong to groups, testing both insn_belongs_to_group
@@ -596,10 +600,10 @@ mod test {
                 "call",
                 b"\xe8\x28\x07\x00\x00",
                 &[CALL],
+                &[X86_REG_RIP, X86_REG_RSP],
                 &[X86_REG_RSP],
-                &[],
             ),
-            ("ret", b"\xc3", &[RET], &[], &[]),
+            ("ret", b"\xc3", &[RET], &[X86_REG_RSP], &[X86_REG_RSP]),
             ("syscall", b"\x0f\x05", &[INT], &[], &[]),
             ("iretd", b"\xcf", &[IRET], &[], &[]),
             ("sub", b"\x48\x83\xec\x08", &[], &[], &[X86_REG_EFLAGS]),
@@ -749,10 +753,17 @@ mod test {
                 "callq",
                 b"\xe8\x28\x07\x00\x00",
                 &[CALL],
+                &[X86_REG_RIP, X86_REG_RSP],
                 &[X86_REG_RSP],
-                &[],
             ),
-            ("ret", "retq", b"\xc3", &[RET], &[], &[]),
+            (
+                "ret",
+                "retq",
+                b"\xc3",
+                &[RET],
+                &[X86_REG_RSP],
+                &[X86_REG_RSP],
+            ),
             ("syscall", "syscall", b"\x0f\x05", &[INT], &[], &[]),
             ("iretd", "iretl", b"\xcf", &[IRET], &[], &[]),
             (
@@ -792,8 +803,7 @@ mod test {
             .iter()
             .map(|&(mnemonic, _, bytes, groups, reads, writes)| {
                 (mnemonic, bytes, groups, reads, writes)
-            })
-            .collect();
+            }).collect();
         let expected_insns_att: Vec<(
             &str,
             &[u8],
@@ -804,8 +814,7 @@ mod test {
             .iter()
             .map(|&(_, mnemonic, bytes, groups, reads, writes)| {
                 (mnemonic, bytes, groups, reads, writes)
-            })
-            .collect();
+            }).collect();
 
         let mut cs = Capstone::new()
             .x86()
@@ -1041,6 +1050,7 @@ mod test {
                                 index: 0,
                                 scale: 1,
                                 disp: -4,
+                                lshift: 0,
                             })),
                             ..Default::default()
                         },
@@ -1067,6 +1077,7 @@ mod test {
                                 index: 0,
                                 scale: 1,
                                 disp: -992,
+                                lshift: 0,
                             })),
                             ..Default::default()
                         },

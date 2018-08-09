@@ -213,7 +213,7 @@ macro_rules! arch_info_base {
                     Mode32,
                     Mode64,
                     Mips32R6,
-                    MipsGP64,
+                    Mips64,
                     )
                 ( extra_modes:
                     Micro,
@@ -268,6 +268,15 @@ macro_rules! arch_info_base {
             ]
             [
                 ( xcore, XCORE )
+                ( mode:
+                    Default,
+                    )
+                ( extra_modes: )
+                ( syntax: )
+                ( both_endian: false  )
+            ]
+            [
+                ( evm, EVM )
                 ( mode:
                     Default,
                     )

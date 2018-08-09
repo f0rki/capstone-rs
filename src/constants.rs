@@ -57,6 +57,8 @@ define_cs_enum_wrapper!(
     => SYSZ = CS_ARCH_SYSZ;
     /// XCore
     => XCORE = CS_ARCH_XCORE;
+    /// EVM
+    => EVM = CS_ARCH_EVM;
 );
 
 define_cs_enum_wrapper!(
@@ -78,8 +80,8 @@ define_cs_enum_wrapper!(
     => Mips3 = CS_MODE_MIPS3;
     /// Mips32r6 ISA
     => Mips32R6 = CS_MODE_MIPS32R6;
-    /// General Purpose Registers are 64-bit wide (MIPS)
-    => MipsGP64 = CS_MODE_MIPSGP64;
+    /// MIPS with General Purpose Registers are 64-bit wide
+    => Mips64 = CS_MODE_MIPS64;
     /// SparcV9 mode (Sparc)
     => V9 = CS_MODE_V9;
     /// Default mode for little-endian

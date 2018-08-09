@@ -2,26 +2,25 @@
 
 pub use arch::arch_builder::x86::*;
 use arch::DetailsArchInsn;
-use capstone_sys::{x86_op_mem, x86_op_type, cs_x86, cs_x86_op};
+use capstone_sys::{cs_x86, cs_x86_op, x86_op_mem, x86_op_type};
 use instruction::{RegId, RegIdInt};
 use std::convert::From;
 use std::{cmp, fmt, slice};
 
-pub use capstone_sys::x86_insn_group as X86InsnGroup;
-pub use capstone_sys::x86_insn as X86Insn;
-pub use capstone_sys::x86_reg as X86Reg;
 pub use capstone_sys::cs_x86_encoding as X86Encoding;
+pub use capstone_sys::x86_insn as X86Insn;
+pub use capstone_sys::x86_insn_group as X86InsnGroup;
+pub use capstone_sys::x86_reg as X86Reg;
 
 pub use capstone_sys::x86_avx_bcast as X86AvxBcast;
-pub use capstone_sys::x86_sse_cc as X86SseCC;
 pub use capstone_sys::x86_avx_cc as X86AvxCC;
 pub use capstone_sys::x86_avx_rm as X86AvxRm;
+pub use capstone_sys::x86_sse_cc as X86SseCC;
 
 use capstone_sys::cs_x86_op__bindgen_ty_1;
 
 /// Contains X86-specific details for an instruction
 pub struct X86InsnDetail<'a>(pub(crate) &'a cs_x86);
-
 
 impl X86OperandType {
     fn new(op_type: x86_op_type, value: cs_x86_op__bindgen_ty_1) -> X86OperandType {
@@ -32,7 +31,7 @@ impl X86OperandType {
             X86_OP_REG => Reg(RegId(unsafe { value.reg } as RegIdInt)),
             X86_OP_IMM => Imm(unsafe { value.imm }),
             X86_OP_MEM => Mem(X86OpMem(unsafe { value.mem })),
-            X86_OP_FP => Fp(unsafe { value.fp }),
+            //X86_OP_FP => Fp(unsafe { value.fp }),
             X86_OP_INVALID => Invalid,
         }
     }
@@ -109,7 +108,7 @@ impl<'a> X86InsnDetail<'a> {
     }
 
     /// Disp
-    pub fn disp(&self) -> i32 {
+    pub fn disp(&self) -> i64 {
         self.0.disp
     }
 
@@ -198,7 +197,7 @@ impl Default for X86Operand {
             size: 0,
             avx_bcast: X86AvxBcast::X86_AVX_BCAST_INVALID,
             avx_zero_opmask: false,
-            op_type: X86OperandType::Invalid
+            op_type: X86OperandType::Invalid,
         }
     }
 }
@@ -293,39 +292,34 @@ mod test {
             sib_base: x86_reg::X86_REG_INVALID,
             sse_cc: x86_sse_cc::X86_SSE_CC_INVALID,
             avx_cc: x86_avx_cc::X86_AVX_CC_INVALID,
+            xop_cc: x86_xop_cc::X86_XOP_CC_INVALID,
             avx_sae: false,
             avx_rm: x86_avx_rm::X86_AVX_RM_INVALID,
             op_count: 0,
-            operands: [ cs_x86_op {
+            operands: [cs_x86_op {
                 type_: x86_op_type::X86_OP_INVALID,
-                __bindgen_anon_1: cs_x86_op__bindgen_ty_1 { reg: x86_reg::X86_REG_INVALID },
+                __bindgen_anon_1: cs_x86_op__bindgen_ty_1 {
+                    reg: x86_reg::X86_REG_INVALID,
+                },
                 size: 0,
                 avx_bcast: x86_avx_bcast::X86_AVX_BCAST_INVALID,
                 avx_zero_opmask: false,
-            }
-            ; 8],
+                access: 0,
+            }; 8],
             encoding: cs_x86_encoding {
                 modrm_offset: 0,
                 disp_offset: 0,
                 disp_size: 0,
                 imm_offset: 0,
-                imm_size: 0
-            }
-
+                imm_size: 0,
+            },
+            __bindgen_anon_1: cs_x86__bindgen_ty_1 { eflags: 0 },
         };
         let mut a2 = a1.clone();
         a2.operands[1].type_ = x86_op_type::X86_OP_REG;
-        let a1_clone = cs_x86 {
-            ..a1
-        };
-        let a3 = cs_x86 {
-            rex: 1,
-            ..a1
-        };
-        let op_count_differ = cs_x86 {
-            op_count: 1,
-            ..a1
-        };
+        let a1_clone = cs_x86 { ..a1 };
+        let a3 = cs_x86 { rex: 1, ..a1 };
+        let op_count_differ = cs_x86 { op_count: 1, ..a1 };
         let mut op1_differ = op_count_differ.clone();
         op1_differ.operands[0].avx_bcast = x86_avx_bcast::X86_AVX_BCAST_2;
 
